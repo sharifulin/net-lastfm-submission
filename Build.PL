@@ -4,6 +4,7 @@ use Module::Build;
 
 my $builder = Module::Build->new(
     module_name         => 'Net::LastFM::Submission',
+    dist_abstract       => 'Perl interface to the Last.fm Submissions Protocol',
     license             => 'perl',
     dist_author         => 'Anatoly Sharifulin <sharifulin@gmail.com>',
     dist_version_from   => 'lib/Net/LastFM/Submission.pm',

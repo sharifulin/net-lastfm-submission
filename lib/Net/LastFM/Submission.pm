@@ -8,7 +8,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -150,7 +150,7 @@ sub _error {
 }
 
 sub _parse_response {
-	shift; warn $_->status_line."\n".$_->content if DEBUG;
+	shift; warn join "\n", $_->status_line, $_->content if DEBUG;
 	return $_->is_success && $_->content =~ /^ (OK) ( \n (\w+) \n (\S+) \n (\S+) )? /sx
 		? {'status' => $1, $2 ? ('sid' => $3, 'url' => {'np' => $4, 'sm' => $5} ) : ()}
 		: {'code' => $_->code, map { ('error' => $_->[0], $_->[1] ? ('reason' => $_->[1]) : ()) } [$_->content =~ /^(\S+)(?:\s+(.*))?/]}
@@ -173,29 +173,29 @@ sub _encode {
 __END__
 =head1 NAME
 
-Net::LastFM::Submission - simple Perl interface to the Last.fm Submissions Protocol (v1.2.1)
+Net::LastFM::Submission - Perl interface to the Last.fm Submissions Protocol
 
 =head1 SYNOPSIS
 
-	use Net::LastFM::Submission;
-	
-	my $submit = Net::LastFM::Submission->new(
-		'user'      => 'XXX',
-		'password'  => 'YYY',
-	);
-	
-	$submit->handshake;
-	
-	$submit->submit(
-		'artist' => 'Artist name',
-		'title'  => 'Track title',
-		'time'   => time - 10*60, # 10 minutes ago
-	);
-	
-	$submit->now_playing(
-		'artist' => 'Artist name',
-		'title'  => 'Track title',
-	);
+    use Net::LastFM::Submission;
+    
+    my $submit = Net::LastFM::Submission->new(
+        'user'      => 'XXX',
+        'password'  => 'YYY',
+    );
+    
+    $submit->handshake;
+    
+    $submit->submit(
+        'artist' => 'Artist name',
+        'title'  => 'Track title',
+        'time'   => time - 10*60, # 10 minutes ago
+    );
+    
+    $submit->now_playing(
+        'artist' => 'Artist name',
+        'title'  => 'Track title',
+    );
 
 =head1 DESCRIPTION
 
@@ -207,148 +207,149 @@ L<http://www.lastfm.ru/api/submissions>
 
 =head1 METHODS
 
-=over 4
-
-=item new(I<%args>)
+=head2 new(I<%args>)
 
 This is a constructor for Net::LastFM::Submission object. It takes list of parameters or hashref parameter.
 
-	# list
-	my $submit = Net::LastFM::Submission->new(
-		'user'     => 'XXX',
-		'password' => 'YYY',
-	);
-	
-	# hashref
-	my $submit = Net::LastFM::Submission->new({
-		'user'     => 'XXX',
-		'password' => 'YYY',
-	});
+    # list
+    my $submit = Net::LastFM::Submission->new(
+        'user'     => 'XXX',
+        'password' => 'YYY',
+    );
+    
+    # hashref
+    my $submit = Net::LastFM::Submission->new({
+        'user'     => 'XXX',
+        'password' => 'YYY',
+    });
 
 This is a list of support parameters:
 
 =over 9
 
-=item * user
+=item * I<user>
 
 The name of the Last.FM user. Required.
 
-=item * password
+=item * I<password>
 
 The password of the Last.FM user. Required for Standard authentication only.
-It is used for generate authentication token, see section 1.2 L<http://www.lastfm.ru/api/submissions#1.2>.
+It is used for generate authentication token.
+See L<http://www.lastfm.ru/api/submissions#1.2>.
 
-=item * api_key
+=item * I<api_key>
 
 The API key from your Web Services account. Required for Web Services authentication only.
 
-=item * api_secret
+=item * I<api_secret>
 
 The API secret from your Web Services account. Required for Web Services authentication only.
-It is used for generate authentication token, see section 1.3 L<http://www.lastfm.ru/api/submissions#1.3>.
+It is used for generate authentication token.
+See L<http://www.lastfm.ru/api/submissions#1.3>.
 
-=item * secret_key
+=item * I<secret_key>
 
 The Web Services session key generated via the authentication protocol. Required for Web Services authentication only.
 
-=item * clinet_id
+=item * I<client_id>
 
 Is an identifier for the client. Optional.
-Default value is I<tst>, see section 1.1 L<http://www.lastfm.ru/api/submissions#1.1>.
+Default value is B<tst>.
+See L<http://www.lastfm.ru/api/submissions#1.1>.
 
-=item * client_ver
+=item * I<client_ver>
 
 Is the version of the client being used. Optional.
-Default value is I<1.0>.
+Default value is B<1.0>.
 
-=item * ua
+=item * I<ua>
 
 Is an user agent. Optional.
 Default is L<LWP::UserAgent> with timeout 10 seconds.
 
-=item * enc
+=item * I<enc>
 
-Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. See <Encode>. Optional.
-Default value is cp1251.
+Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. See L<Encode>. Optional.
+Default value is B<cp1251>.
 
 =back
 
 
-=item handshake()
+=head2 handshake()
 
 The initial negotiation with the submissions server to establish authentication and connection details for the session.
 See L<http://www.lastfm.ru/api/submissions#handshake>.
 
-	$submit->handshake;
+    $submit->handshake;
 
 If the handshake was successful, the returned hashref has the format:
 
-	{
-		'status' => 'OK',
-		'sid'    => 'Session ID', # the scrobble session id, to be used in all following now-playing and submission requests
-		'url'    => {
-			'np'  => 'Now-Playing URL',
-			'sm'  => 'Submission URL'
-		}
-	}
+    {
+        'status' => 'OK',
+        'sid'    => 'Session ID', # the scrobble session id
+        'url'    => {
+            'np'  => 'Now-Playing URL',
+            'sm'  => 'Submission URL'
+        }
+    }
 
 If the handshake was break, the returned hashref has the format:
 
-	{
-		'error'  => 'BANNED/BADAUTH/BADTIME/FAILED',
-		'code'   => '200/500', # code of status line response
-		'reason' => '...'      # reason of error
-	}
+    {
+        'error'  => 'BANNED/BADAUTH/BADTIME/FAILED',
+        'code'   => '200/500', # code of status line response
+        'reason' => '...'      # reason of error
+    }
 
 
-=item now_playing(I<%args>)
+=head2 now_playing(I<%args>)
 
 Optional lightweight notification of now-playing data at the start of the track for realtime information purposes.
 See L<http://www.lastfm.ru/api/submissions#np>.
 
 It takes list of parameters or hashref parameter.
 
-	# list
-	$submit->now_playing(
-		'artist' => 'Artist name',
-		'title'  => 'Track title',
-	);
-	
-	# hashref
-	$submit->now_playing({
-		'artist' => 'Artist name',
-		'title'  => 'Track title',
-	});
+    # list
+    $submit->now_playing(
+        'artist' => 'Artist name',
+        'title'  => 'Track title',
+    );
+    
+    # hashref
+    $submit->now_playing({
+        'artist' => 'Artist name',
+        'title'  => 'Track title',
+    });
 
 This is a list of support parameters:
 
 =over 7
 
-=item * artist
+=item * I<artist>
 
 The artist name. Required.
 
-=item * title
+=item * I<title>
 
 The track name. Required.
 
-=item * album
+=item * I<album>
 
 The album title, or an empty string if not known.
 
-=item * length
+=item * I<length>
 
 The length of the track in seconds, or an empty string if not known.
 
-=item * id
+=item * I<id>
 
 The position of the track on the album, or an empty string if not known.
 
-=item * mb_id
+=item * I<mb_id>
 
 The MusicBrainz Track ID, or an empty string if not known.
 
-=item * enc
+=item * I<enc>
 
 Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. Optional.
 Default value is parameter enc of self object.
@@ -357,89 +358,89 @@ Default value is parameter enc of self object.
 
 If the notification was successful, the returned hashref has the format:
 
-	{
-		'status' => 'OK',
-	}
+    {
+        'status' => 'OK',
+    }
 
 If the notification was break, the returned hashref has the format:
 
-	{
-		'error'  => 'ERROR/BADSESSION',
-		'code'   => '200/500', # code of status line response
-		'reason' => '...'      # reason of error
-	}
+    {
+        'error'  => 'ERROR/BADSESSION',
+        'code'   => '200/500', # code of status line response
+        'reason' => '...'      # reason of error
+    }
 
 
-=item submit(I<%args>)
+=head2 submit(I<%args>)
 
 Submission of full track data at the end of the track for statistical purposes.
 See L<http://www.lastfm.ru/api/submissions#subs>.
 
 It takes list of parameters (information about one track) or list of hashref parameters (limit of Last.FM is 50).
 
-	# list
-	$submit->submit(
-		'artist' => 'Artist name',
-		'title'  => 'Track title',
-	);
-	
-	# hashref
-	$submit->submit(
-		grep { $_->{'source'} = 'R';1 }
-		{
-			'artist' => 'Artist name 1',
-			'title'  => 'Track title 1',
-			'time'   => time - 10*60,
-		}
-		{
-			'artist' => 'Artist name 2',
-			'title'  => 'Track title 2',
-		}
-	);
+    # list
+    $submit->submit(
+        'artist' => 'Artist name',
+        'title'  => 'Track title',
+    );
+    
+    # hashref
+    $submit->submit(
+        grep { $_->{'source'} = 'R';1 }
+        {
+            'artist' => 'Artist name 1',
+            'title'  => 'Track title 1',
+            'time'   => time - 10*60,
+        }
+        {
+            'artist' => 'Artist name 2',
+            'title'  => 'Track title 2',
+        }
+    );
 
 This is a list of support parameters:
 
 =over 10
 
-=item * artist
+=item * I<artist>
 
 The artist name. Required.
 
-=item * title
+=item * I<title>
 
 The track name. Required.
 
-=item * time
+=item * I<time>
 
 The time the track started playing, in UNIX timestamp format. Optional.
 Default value is current time.
 
-=item * source
+=item * I<source>
 
 The source of the track. Optional.
-Default value is R.
+Default value is B<R>.
 
-=item * rating
+=item * I<rating>
 
 A single character denoting the rating of the track. Empty if not applicable. 
 
-=item * length
+=item * I<length>
 
 The length of the track in seconds. Required when the source is P, optional otherwise.
 
-=item * album
+=item * I<album>
 
 The album title, or an empty string if not known.
 
-=item * id
+=item * I<id>
 
 The position of the track on the album, or an empty string if not known.
 
-=item * mb_id
+=item * I<mb_id>
 
 The MusicBrainz Track ID, or an empty string if not known.
 
-=item * enc
+=item * I<enc>
 
 Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. Optional.
 Default value is parameter enc of self object.
@@ -448,27 +449,24 @@ Default value is parameter enc of self object.
 
 If the submit was successful, the returned hashref has the format:
 
-	{
-		'status' => 'OK',
-	}
+    {
+        'status' => 'OK',
+    }
 
 If the submit was break, the returned hashref has the format:
 
-	{
-		'error'  => 'ERROR/BADSESSION/FAILED',
-		'code'   => '200/500', # code of status line response
-		'reason' => '...'      # reason of error
-	}
-
-=back
-
+    {
+        'error'  => 'ERROR/BADSESSION/FAILED',
+        'code'   => '200/500', # code of status line response
+        'reason' => '...'      # reason of error
+    }
 
 =head1 DEBUG MODE
 
 Module supports debug mode.
 
-	BEGIN { $ENV{SUBMISSION_DEBUG}++ };
-	use Net::LastFM::Submission;
+    BEGIN { $ENV{SUBMISSION_DEBUG}++ };
+    use Net::LastFM::Submission;
 
 =head1 SEE ALSO
 
@@ -498,11 +496,11 @@ Please report any bugs or feature requests to C<bug-net-lastfm-submission at rt.
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-LastFM-Submission>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-=head1 SUPPORT
+=head1 SUPPORT & DOCUMENTATION
 
 You can find documentation for this module with the perldoc command.
 
-	perldoc Net::LastFM::Submission
+    perldoc Net::LastFM::Submission
 
 You can also look for information at:
 
@@ -528,8 +526,9 @@ L<http://search.cpan.org/dist/Net-LastFM-Submission>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 Anatoly Sharifulin, all rights reserved.
+Copyright (C) 2009 Anatoly Sharifulin
 
-This module is free software; you can redistribute it or modify it under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
