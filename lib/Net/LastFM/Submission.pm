@@ -504,7 +504,11 @@ You can find documentation for this module with the perldoc command.
 
 You can also look for information at:
 
-=over 4
+=over 5
+
+=item * Github
+
+L<http://github.com/sharifulin/net-lastfm-submission/tree/master>
 
 =item * RT: CPAN's request tracker
 
