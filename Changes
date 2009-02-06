@@ -1,7 +1,10 @@
 Revision history for Net-LastFM-Submission
 
+0.3  2009-02-06/16:43
+	Add dependecies, add eg/ut8.pl, add grep with encode
+
 0.2  2009-02-05/00:20
-		Edit POD manual
+	Edit POD manual
 
 0.1  2009-02-04/18:05
-		First version
+	First version
