@@ -1,17 +1,20 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -CDSA
+use utf8; # encoding="utf-8"
 use strict;
 
+use lib '../lib';
 BEGIN { $ENV{'SUBMISSION_DEBUG'}++ };
 use Net::LastFM::Submission;
 use Data::Dumper;
 
+warn $Net::LastFM::Submission::VERSION;
+
 my $submit = Net::LastFM::Submission->new(
 	'user'      => 'sharifulin',
-	'password'  => '********',
-	'enc'       => 'latin1',
+	'password'  => 'tollik12',
 );
 
-warn Dumper $submit->handshake;
+$submit->handshake;
 
 warn Dumper $submit->submit(
 	'artist' => 'Artist name',
@@ -19,8 +22,8 @@ warn Dumper $submit->submit(
 	'time'   => time - 10*60,
 );
 
+# no module encoding
 warn Dumper $submit->now_playing(
-	'artist' => 'Артист',
-	'title'  => 'Песня',
-	'enc'    => 'cp1251',
+	'artist' => 'РђСЂС‚РёСЃС‚',
+	'title'  => 'РџРµСЃРЅСЏ',
 );
