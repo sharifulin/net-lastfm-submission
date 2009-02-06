@@ -7,7 +7,14 @@ WriteMakefile
           'EXE_FILES' => [],
           'VERSION_FROM' => 'lib/Net/LastFM/Submission.pm',
           'PREREQ_PM' => {
-                           'Test::More' => 0
+                           'Test::More' => 0,
+                           'Test::Pod::Coverage' => 0,
+                           'Pod::Coverage' => 0,
+                           'LWP::UserAgent' => 0,
+                           'HTTP::Request::Common' => 0,
+                           'Encode' => 0,
+                           'Digest::MD5' => 0,
+                           'Carp' => 0,
                          }
         )
 ;

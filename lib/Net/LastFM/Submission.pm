@@ -8,7 +8,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -85,7 +85,7 @@ sub now_playing {
 	return $self->_error('Need Session ID string returned by the handshake request'  ) unless $self->{'hs'}->{'sid'};
 	return $self->_error('Need artist/title name') if grep { !$param->{$_} } 'artist', 'title';
 	
-	$self->_encode($param->{'enc'}) for @$param{'artist', 'title', 'album'};
+	$self->_encode($param->{'enc'}) for grep { $_ } @$param{'artist', 'title', 'album'};
 	
 	return $self->_parse_response for $self->{'ua'}->request(
 		grep { DEBUG && warn $_->as_string;1 }
@@ -112,7 +112,7 @@ sub submit {
 	$list = [
 		grep {
 			my $enc = $_->{'enc'};
-			$self->_encode($enc) for @$_{'artist', 'title', 'album'};
+			$self->_encode($enc) for grep { $_ } @$_{'artist', 'title', 'album'};
 			1;
 		}
 		grep { $_->{'title'} && $_->{'artist'} }
@@ -265,7 +265,7 @@ Default value is B<1.0>.
 =item * I<ua>
 
 Is an user agent. Optional.
-Default is L<LWP::UserAgent> with timeout 10 seconds.
+Default value is L<LWP::UserAgent> object with timeout 10 seconds.
 
 =item * I<enc>
 
@@ -356,13 +356,13 @@ Default value is parameter enc of self object.
 
 =back
 
-If the notification was successful, the returned hashref has the format:
+If the notification was successful, the returned hashref will have the format:
 
     {
         'status' => 'OK',
     }
 
-If the notification was break, the returned hashref has the format:
+If the notification was break, the returned hashref will have the format:
 
     {
         'error'  => 'ERROR/BADSESSION',
@@ -447,13 +447,13 @@ Default value is parameter enc of self object.
 
 =back
 
-If the submit was successful, the returned hashref has the format:
+If the submit was successful, the returned hashref will have the format:
 
     {
         'status' => 'OK',
     }
 
-If the submit was break, the returned hashref has the format:
+If the submit was break, the returned hashref will have the format:
 
     {
         'error'  => 'ERROR/BADSESSION/FAILED',
@@ -485,6 +485,10 @@ Perl interface to audioscrobbler.com/last.fm. Old interface for submit.
 Module providing routines to submit songs to last.fm using 1.2 protocol. Use path to a track or Music::Tag or hashref. Very big :).
 
 =back
+
+=head1 DEPENDENCIES
+
+L<LWP::UserAgent>, L<HTTP::Request::Common>, L<Encode>, L<Digest::MD5>, L<Carp>
 
 =head1 AUTHOR
 
