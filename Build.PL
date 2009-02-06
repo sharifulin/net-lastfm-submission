@@ -10,8 +10,6 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Net/LastFM/Submission.pm',
     build_requires => {
         'Test::More' => 0,
-        'Test::Pod::Coverage' => 0,
-        'Pod::Coverage' => 0,
     },
     requires => {
         'perl' => '5.008',
