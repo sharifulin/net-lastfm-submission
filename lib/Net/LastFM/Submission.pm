@@ -8,7 +8,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -253,23 +253,23 @@ The Web Services session key generated via the authentication protocol. Required
 
 =item * I<client_id>
 
-Is an identifier for the client. Optional.
+The identifier for the client. Optional.
 Default value is B<tst>.
 See L<http://www.lastfm.ru/api/submissions#1.1>.
 
 =item * I<client_ver>
 
-Is the version of the client being used. Optional.
+The version of the client being used. Optional.
 Default value is B<1.0>.
 
 =item * I<ua>
 
-Is an user agent. Optional.
+The user agent of the client. Optional.
 Default value is L<LWP::UserAgent> object with timeout 10 seconds.
 
 =item * I<enc>
 
-Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. See L<Encode>. Optional.
+The encoding of the data, the module tries to encode the data (artist/title/album) unless the data is UTF-8. See L<Encode>. Optional.
 Default value is B<cp1251>.
 
 =back
@@ -282,7 +282,7 @@ See L<http://www.lastfm.ru/api/submissions#handshake>.
 
     $submit->handshake;
 
-If the handshake was successful, the returned hashref has the format:
+If the handshake is successful, the returned hashref should be the following format:
 
     {
         'status' => 'OK',
@@ -293,7 +293,7 @@ If the handshake was successful, the returned hashref has the format:
         }
     }
 
-If the handshake was break, the returned hashref has the format:
+Else:
 
     {
         'error'  => 'BANNED/BADAUTH/BADTIME/FAILED',
@@ -351,18 +351,17 @@ The MusicBrainz Track ID, or an empty string if not known.
 
 =item * I<enc>
 
-Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. Optional.
-Default value is parameter enc of self object.
+The encoding of the data, the module tries to encode the  data (artist/title/album) unless the data is UTF-8. Optional.
 
 =back
 
-If the notification was successful, the returned hashref will have the format:
+If the notification is successful, the returned hashref should be the following format:
 
     {
         'status' => 'OK',
     }
 
-If the notification was break, the returned hashref will have the format:
+Else:
 
     {
         'error'  => 'ERROR/BADSESSION',
@@ -442,18 +441,17 @@ The MusicBrainz Track ID, or an empty string if not known.
 
 =item * I<enc>
 
-Is the encoding of data, module try to encode a data (artist/title/album) unless data is UTF-8. Optional.
-Default value is parameter enc of self object.
+The encoding of the data, the module tries to encode the data (artist/title/album) unless the data is UTF-8. Optional.
 
 =back
 
-If the submit was successful, the returned hashref will have the format:
+If the submit is successful, the returned hashref should be the following format:
 
     {
         'status' => 'OK',
     }
 
-If the submit was break, the returned hashref will have the format:
+Else:
 
     {
         'error'  => 'ERROR/BADSESSION/FAILED',
@@ -463,7 +461,7 @@ If the submit was break, the returned hashref will have the format:
 
 =head1 DEBUG MODE
 
-Module supports debug mode.
+The module supports debug mode.
 
     BEGIN { $ENV{SUBMISSION_DEBUG}++ };
     use Net::LastFM::Submission;
@@ -488,7 +486,7 @@ Module providing routines to submit songs to last.fm using 1.2 protocol. Use pat
 
 =head1 DEPENDENCIES
 
-L<LWP::UserAgent>, L<HTTP::Request::Common>, L<Encode>, L<Digest::MD5>, L<Carp>
+L<LWP::UserAgent> L<HTTP::Request::Common> L<Encode> L<Digest::MD5> L<Carp>
 
 =head1 AUTHOR
 
