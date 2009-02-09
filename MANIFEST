@@ -6,5 +6,7 @@ lib/Net/LastFM/Submission.pm
 t/00-load.t
 t/pod-coverage.t
 t/pod.t
+eg/test.pl
+eg/utf8.pl
 Makefile.PL
 META.yml
