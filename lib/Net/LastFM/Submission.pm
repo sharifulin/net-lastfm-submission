@@ -1,8 +1,6 @@
 package Net::LastFM::Submission;
 use strict;
 
-# comment
-
 use LWP::UserAgent;
 use HTTP::Request::Common 'GET', 'POST';
 use Digest::MD5 'md5_hex';
