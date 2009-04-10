@@ -1,5 +1,6 @@
 package Net::LastFM::Submission;
 use strict;
+use warnings;
 
 use LWP::UserAgent;
 use HTTP::Request::Common 'GET', 'POST';
@@ -8,7 +9,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -56,28 +57,62 @@ sub new {
 	bless $self, ref $class || $class;
 }
 
-sub handshake {
+{
+	no strict 'refs';
+	for my $m ('handshake', 'now_playing', 'submit') {
+		*{$m} = sub {
+			my $self = shift;
+			my $r    = $self->${\"_request_$m"}(@_);
+			
+			return $r unless ref $r eq 'HTTP::Request';
+			
+			my $data = $self->_response($self->{'ua'}->request($r));
+			$self->_save_handshake($data) if $m eq 'handshake'; # spesial action for handshake
+			
+			return $data;
+		};
+	}
+}
+
+# save handshake data
+
+sub _save_handshake {
+	my $self = shift;
+	my $data = shift;
+	
+	if ($data->{'status'} && $data->{'url'} && $data->{'sid'}) {
+		DEBUG && warn "Save handshake data: $data->{'url'}->{'np'}, $data->{'sid'}";
+		$self->{'hs'} = $data;
+	}
+	
+	return $data;
+}
+
+# generate requests
+
+sub _request_handshake {
 	my $self = shift;
 	my $time = time;
 	
 	$self->{'auth'}->{'token'} = md5_hex(($self->{'auth'}->{'type'} eq 'web' ? $self->{'api'}->{'secret'} : md5_hex $self->{'user'}->{'password'}).$time);
 	
-	return $self->{'hs'} = $self->_parse_response for $self->{'ua'}->request(
-		grep { DEBUG && warn $_->as_string; 1 }
-		GET(join '?', $URL, join '&',
-			'hs=true',
-			"p=$self->{'proto' }",
-			"c=$self->{'client'}->{'id'  }",
-			"v=$self->{'client'}->{'ver' }",
-			"u=$self->{'user'  }->{'name'}",
-			"t=$time",
-			"a=$self->{'auth'}->{'token'}",
-			$self->{'auth'}->{'type'} eq 'web' ? ("api_key=$self->{'api'}->{'key'}", "sk=$self->{'auth'}->{'session'}") : (),
-		)
+	my $r = GET(join '?', $URL, join '&',
+		'hs=true',
+		"p=$self->{'proto' }",
+		"c=$self->{'client'}->{'id'  }",
+		"v=$self->{'client'}->{'ver' }",
+		"u=$self->{'user'  }->{'name'}",
+		"t=$time",
+		"a=$self->{'auth'}->{'token'}",
+		$self->{'auth'}->{'type'} eq 'web' ? ("api_key=$self->{'api'}->{'key'}", "sk=$self->{'auth'}->{'session'}") : (),
 	);
+	
+	DEBUG && warn $r->as_string;
+	
+	return $r;
 }
 
-sub now_playing {
+sub _request_now_playing {
 	my $self  = shift;
 	my $param = ref $_[0] eq 'HASH' ? shift : {@_};
 	
@@ -87,27 +122,28 @@ sub now_playing {
 	
 	$self->_encode($param->{'enc'}) for grep { $_ } @$param{'artist', 'title', 'album'};
 	
-	return $self->_parse_response for $self->{'ua'}->request(
-		grep { DEBUG && warn $_->as_string;1 }
-		POST($self->{'hs'}->{'url'}->{'np'}, [
-			's' => $self->{'hs'}->{'sid'},
-			'a' => $param->{'artist'},
-			't' => $param->{'title' },
-			'b' => $param->{'album' },
-			'l' => $param->{'length'},
-			'n' => $param->{'id'    },
-			'm' => $param->{'mb_id' },
-		])
-	);
+	my $r = POST($self->{'hs'}->{'url'}->{'np'}, [
+		's' => $self->{'hs'}->{'sid'},
+		'a' => $param->{'artist'},
+		't' => $param->{'title' },
+		'b' => $param->{'album' },
+		'l' => $param->{'length'},
+		'n' => $param->{'id'    },
+		'm' => $param->{'mb_id' },
+	]);
+	
+	DEBUG && warn $r->as_string;
+	
+	return $r;
 }
 
-sub submit {
+sub _request_submit {
 	my $self = shift;
 	my $list = ref $_[0] eq 'HASH' ? [@_] : [{@_}];
 	
 	return $self->_error('Need the now-playing URL returned by the handshake request') unless $self->{'hs'}->{'url'}->{'np'};
 	return $self->_error('Need Session ID string returned by the handshake request'  ) unless $self->{'hs'}->{'sid'};
-	warn "Use first $self->{'limit'} tracks for submissions" if DEBUG;
+	DEBUG && warn "Use first $self->{'limit'} tracks for submissions";
 	
 	$list = [
 		grep {
@@ -121,41 +157,54 @@ sub submit {
 	return $self->_error('Need artist/title name') unless @$list;
 	
 	my $i;
-	return $self->_parse_response for $self->{'ua'}->request(
-		grep { DEBUG && warn $_->as_string;1 }
-		POST($self->{'hs'}->{'url'}->{'sm'}, [
-			's' => $self->{'hs'}->{'sid'},
-			map {
-				$i = defined $i ? $i+1 : 0;
-				(
-					"a[$i]" => $_->{'artist'},
-					"t[$i]" => $_->{'title' },
-					"i[$i]" => $_->{'time'  } || time,
-					"o[$i]" => $_->{'source'} ||  'R',
-					"r[$i]" => $_->{'rating'},
-					"l[$i]" => $_->{'length'},
-					"b[$i]" => $_->{'album' },
-					"n[$i]" => $_->{'id'    },
-					"m[$i]" => $_->{'mb_id' },
-				);
-			}
-			@$list
-		])
-	);
+	my $r = POST($self->{'hs'}->{'url'}->{'sm'}, [
+		's' => $self->{'hs'}->{'sid'},
+		map {
+			$i = defined $i ? $i+1 : 0;
+			(
+				"a[$i]" => $_->{'artist'},
+				"t[$i]" => $_->{'title' },
+				"i[$i]" => $_->{'time'  } || time,
+				"o[$i]" => $_->{'source'} ||  'R',
+				"r[$i]" => $_->{'rating'},
+				"l[$i]" => $_->{'length'},
+				"b[$i]" => $_->{'album' },
+				"n[$i]" => $_->{'id'    },
+				"m[$i]" => $_->{'mb_id' },
+			);
+		}
+		@$list
+	]);
+	
+	DEBUG && warn $r->as_string;
+	
+	return $r;
 }
+
+# parse response
+
+sub _response {
+	my $self = shift;
+	my $r    = shift;
+	
+	return $self->_error('No response object') unless $r && ref $r eq 'HTTP::Response';
+	
+	DEBUG && warn join "\n", $r->status_line, $r->content;
+	
+	return $r->is_success && $r->content =~ /^ (OK) ( \n (\w+) \n (\S+) \n (\S+) )? /sx
+		? {'status' => $1, $2 ? ('sid' => $3, 'url' => {'np' => $4, 'sm' => $5} ) : ()}
+		: {'code' => $r->code, map { ('error' => $_->[0], $_->[1] ? ('reason' => $_->[1]) : ()) } [$r->content =~ /^(\S+)(?:\s+(.*))?/]}
+	;
+}
+
+# generate error
 
 sub _error {
 	shift;
 	return {'error' => 'ERROR', 'reason' => shift};
 }
 
-sub _parse_response {
-	shift; warn join "\n", $_->status_line, $_->content if DEBUG;
-	return $_->is_success && $_->content =~ /^ (OK) ( \n (\w+) \n (\S+) \n (\S+) )? /sx
-		? {'status' => $1, $2 ? ('sid' => $3, 'url' => {'np' => $4, 'sm' => $5} ) : ()}
-		: {'code' => $_->code, map { ('error' => $_->[0], $_->[1] ? ('reason' => $_->[1]) : ()) } [$_->content =~ /^(\S+)(?:\s+(.*))?/]}
-	;
-}
+# encode data
 
 sub _encode {
 	my $self = shift;
@@ -459,12 +508,56 @@ Else:
         'reason' => '...'      # reason of error
     }
 
+
+=head1 GENERATE REQUESTS AND PARSE RESPONSES
+
+Module can generate a requests for handshake, now playing and submit operations. These methods return HTTP::Request instance.
+One request has support parameters same as method.
+
+=over 3
+
+=item * I<_request_handshake()>
+
+Generate I<GET> request for handshake. See I<handshake()> method.
+
+=item * I<_request_now_playing(I<%args>)>
+
+Generate I<POST> request for now playing. See I<now_playing(%args)> method.
+
+=item * I<_request_submit(I<%args>)>
+
+Generate I<POST> request for submit. See I<submit(%args)> method.
+
+=back
+
+Also module can parse a response (HTTP::Response instance) of these requests.
+
+I<_response($response)>
+
+
+	my $request  = $self->_request_handshake; # generate request for handshake, return HTTP::Request instance
+	...
+	my $response = send_request($request); # send this request, return HTTP::Response instance
+	...
+	$self->_response($response); # parse this request
+
+
+This feature can use for async model (even-driven) such as L<POE>, L<IO::Lambda> or L<AnyEvent>.
+
+See L<POE::Component::Net::Submission::LastFM>.
+
+
 =head1 DEBUG MODE
 
 The module supports debug mode.
 
     BEGIN { $ENV{SUBMISSION_DEBUG}++ };
     use Net::LastFM::Submission;
+
+=head1 EXAMPLES
+
+See I<examples/*> in this distributive.
+
 
 =head1 SEE ALSO
 

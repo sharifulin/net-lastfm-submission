@@ -3,10 +3,12 @@ Changes
 MANIFEST
 README
 lib/Net/LastFM/Submission.pm
+lib/POE/Component/Net/LastFM/Submission.pm
 t/00-load.t
 t/pod-coverage.t
 t/pod.t
-eg/test.pl
-eg/utf8.pl
+examples/test.pl
+examples/utf8.pl
+examples/poe.pl
 Makefile.PL
 META.yml
