@@ -9,7 +9,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -229,21 +229,21 @@ Net::LastFM::Submission - Perl interface to the Last.fm Submissions Protocol
     use Net::LastFM::Submission;
     
     my $submit = Net::LastFM::Submission->new(
-        'user'      => 'XXX',
-        'password'  => 'YYY',
+        user      => 'XXX',
+        password  => 'YYY',
     );
     
     $submit->handshake;
     
     $submit->submit(
-        'artist' => 'Artist name',
-        'title'  => 'Track title',
-        'time'   => time - 10*60, # 10 minutes ago
+        artist => 'Artist name',
+        title  => 'Track title',
+        time   => time - 10*60, # 10 minutes ago
     );
     
     $submit->now_playing(
-        'artist' => 'Artist name',
-        'title'  => 'Track title',
+        artist => 'Artist name',
+        title  => 'Track title',
     );
 
 =head1 DESCRIPTION
@@ -262,14 +262,14 @@ This is a constructor for Net::LastFM::Submission object. It takes list of param
 
     # list
     my $submit = Net::LastFM::Submission->new(
-        'user'     => 'XXX',
-        'password' => 'YYY',
+        user     => 'XXX',
+        password => 'YYY',
     );
     
     # hashref
     my $submit = Net::LastFM::Submission->new({
-        'user'     => 'XXX',
-        'password' => 'YYY',
+        user     => 'XXX',
+        password => 'YYY',
     });
 
 This is a list of support parameters:
@@ -360,14 +360,14 @@ It takes list of parameters or hashref parameter.
 
     # list
     $submit->now_playing(
-        'artist' => 'Artist name',
-        'title'  => 'Track title',
+        artist => 'Artist name',
+        title  => 'Track title',
     );
     
     # hashref
     $submit->now_playing({
-        'artist' => 'Artist name',
-        'title'  => 'Track title',
+        artist => 'Artist name',
+        title  => 'Track title',
     });
 
 This is a list of support parameters:
@@ -428,21 +428,21 @@ It takes list of parameters (information about one track) or list of hashref par
 
     # list
     $submit->submit(
-        'artist' => 'Artist name',
-        'title'  => 'Track title',
+        artist => 'Artist name',
+        title  => 'Track title',
     );
     
     # hashref
     $submit->submit(
-        grep { $_->{'source'} = 'R';1 }
+        grep { $_->{'source'} = 'R' }
         {
-            'artist' => 'Artist name 1',
-            'title'  => 'Track title 1',
-            'time'   => time - 10*60,
-        }
+            artist => 'Artist name 1',
+            title  => 'Track title 1',
+            time   => time - 10*60,
+        },
         {
-            'artist' => 'Artist name 2',
-            'title'  => 'Track title 2',
+            artist => 'Artist name 2',
+            title  => 'Track title 2',
         }
     );
 

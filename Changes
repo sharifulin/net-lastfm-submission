@@ -1,5 +1,8 @@
 Revision history for Net-LastFM-Submission
 
+0.6  2009-04-10/23:22
+	Fix documentation
+
 0.5  2009-04-10/15:13
 	Add POE::Component::Net::LastFM::Submission and support generate requests and parse response.
 	Add examples/poe.pl.

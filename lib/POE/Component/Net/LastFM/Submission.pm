@@ -9,7 +9,7 @@ use Net::LastFM::Submission 0.5; # support generate requests and parse response
 
 use constant TRACE => $ENV{'SUBMISSION_TRACE'} || 0;
 
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 
 sub spawn {
 	my $type  = shift;
@@ -66,7 +66,7 @@ sub spawn {
 __END__
 =head1 NAME
 
-POE::Componenet::Net::LastFM::Submission - non-blocking wrapper around Net::LastFM::Submission
+POE::Component::Net::LastFM::Submission - non-blocking wrapper around Net::LastFM::Submission
 
 =head1 SYNOPSIS
 
@@ -207,7 +207,7 @@ See I<examples/poe.pl> in this distributive.
 
 =head1 SEE ALSO
 
-L<POE>, L<Net::LastFM::Submission>
+L<POE> L<Net::LastFM::Submission>
 
 =head1 DEPENDENCIES
 
