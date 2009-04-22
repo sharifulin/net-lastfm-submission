@@ -9,7 +9,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.61';
+our $VERSION = '0.62';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {

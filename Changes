@@ -1,5 +1,8 @@
 Revision history for Net-LastFM-Submission
 
+0.62 2009-04-21 19:46
+	Support to PoCo::Net::LastFM::Submission job_id (version 0.22)
+
 0.61 2009-04-21 12:33
 	Add encode_data and remove _encode
 

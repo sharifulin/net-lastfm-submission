@@ -9,13 +9,13 @@ use Net::LastFM::Submission 0.5; # support generate requests and parse response
 
 use constant TRACE => $ENV{'SUBMISSION_TRACE'} || 0;
 
-our $VERSION = 0.2;
+our $VERSION = 0.22;
 
 sub spawn {
 	my $type  = shift;
 	my $param =  {@_};
 	
-	my $mi    = $type.'->new()'; # hi, Rocco Caputto!
+	my $mi    = $type.'->spawn()'; # hi, Rocco Caputto!
 	croak "$mi requires an even number of parameters" if @_ & 1;
 	
 	my $alias = join('_', __PACKAGE__, 'HTTP_CLIENT');
@@ -35,8 +35,8 @@ sub spawn {
 			(map {
 				my $m = $_;
 				$m => sub {
-					my $data    = {'session' => $_[SENDER], 'event' => $_[ARG0], 'method' => $m};
-					my $request = $_[HEAP]->{'submit'}->${\"_request_$m"}(@_[ARG1..$#_]);
+					my $data    = {'session' => $_[SENDER], 'event' => $_[ARG0], 'method' => $m, 'arg' => $_[ARG2]};
+					my $request = $_[HEAP]->{'submit'}->${\"_request_$m"}(@_[ARG1]);
 					
 					return $_[KERNEL]->post($data->{'session'} => $data->{'event'}, $request => $data->{'method'})
 						unless ref $request eq 'HTTP::Request';
@@ -54,7 +54,10 @@ sub spawn {
 				
 				$_[HEAP]->{'submit'}->_save_handshake($response) if $data->{'method'} eq 'handshake';
 				
-				$_[KERNEL]->post($data->{'session'} => $data->{'event'}, $response => $data->{'method'});
+				$_[KERNEL]->post(
+					$data->{'session'} => $data->{'event'},
+					$response => $data->{'arg'} => $data->{'method'}
+				);
 			},
 		}
 	);
@@ -72,6 +75,7 @@ POE::Component::Net::LastFM::Submission - non-blocking wrapper around Net::LastF
 
     use strict;
     use POE qw(Component::Net::LastFM::Submission);
+    use Data::Dumper;
     
     POE::Component::Net::LastFM::Submission->spawn(
         Alias  => 'LASTFM_SUBMIT',
@@ -91,9 +95,11 @@ POE::Component::Net::LastFM::Submission - non-blocking wrapper around Net::LastF
             _delay => sub { $_[KERNEL]->delay($_[STATE] => 5) },
             
             np => sub {
+                warn Dumper @_[ARG0..$#_];
                 $_[KERNEL]->post(
                     'LASTFM_SUBMIT' => 'now_playing' => 'np',
-                    {'artist' => 'ArtistName', 'title'  => 'TrackTitle'}
+                    {'artist' => 'ArtistName', 'title'  => 'TrackTitle'},
+                    'job_id'
                 );
             },
         }
@@ -165,7 +171,9 @@ Second param is accepted event such as I<handshake>, I<now_playing> and I<submit
 
 Third param is a event for return after execute request.
 
-Forth param and so on are params for the accepted event (for real method of Net::LastFM::Submission).
+Forth param is hashref param for the accepted event (for real method of Net::LastFM::Submission).
+
+Fiveth param is a tag to identify the request.
 
 
 =head2 handshake
@@ -177,7 +185,8 @@ Forth param and so on are params for the accepted event (for real method of Net:
 
      $_[KERNEL]->post(
         'LASTFM_SUBMIT' => 'now_playing' => 'np',
-        {'artist' => 'ArtistName', 'title'  => 'TrackTitle'} # params of now_playing
+        {'artist' => 'ArtistName', 'title'  => 'TrackTitle'}, # params of now_playing
+        'job_id'
     );
 
 See params of I<now_playing> in L<Net::LastFM::Submission>.
@@ -187,7 +196,8 @@ See params of I<now_playing> in L<Net::LastFM::Submission>.
 
     $_[KERNEL]->post(
         'LASTFM_SUBMIT' => 'submit' => 'sb',
-        {'artist' => 'ArtistName', 'title'  => 'TrackTitle', 'time'   => time - 10*60} # params of submit
+        {'artist' => 'ArtistName', 'title'  => 'TrackTitle', 'time'   => time - 10*60}, # params of submit
+        'job_id'
     );
 
 See params of I<submit> in L<Net::LastFM::Submission>.
