@@ -9,7 +9,7 @@ use Net::LastFM::Submission 0.5; # support generate requests and parse response
 
 use constant TRACE => $ENV{'SUBMISSION_TRACE'} || 0;
 
-our $VERSION = 0.22;
+our $VERSION = 0.23;
 
 sub spawn {
 	my $type  = shift;
@@ -36,7 +36,7 @@ sub spawn {
 				my $m = $_;
 				$m => sub {
 					my $data    = {'session' => $_[SENDER], 'event' => $_[ARG0], 'method' => $m, 'arg' => $_[ARG2]};
-					my $request = $_[HEAP]->{'submit'}->${\"_request_$m"}(@_[ARG1]);
+					my $request = $_[HEAP]->{'submit'}->${\"_request_$m"}($_[ARG1]);
 					
 					return $_[KERNEL]->post($data->{'session'} => $data->{'event'}, $request => $data->{'method'})
 						unless ref $request eq 'HTTP::Request';
