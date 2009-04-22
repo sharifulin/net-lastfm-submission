@@ -17,13 +17,13 @@ my $submit = Net::LastFM::Submission->new(
 $submit->handshake;
 
 warn Dumper $submit->submit(
-	'artist' => 'Artist name',
-	'title'  => 'Track title',
+	'artist' => 'Артист1',
+	'title'  => 'Песня1',
 	'time'   => time - 10*60,
 );
 
 # no module encoding
 warn Dumper $submit->now_playing(
-	'artist' => 'Артист',
-	'title'  => 'Песня',
+	'artist' => 'Артист2',
+	'title'  => 'Песня2',
 );

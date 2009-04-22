@@ -3,7 +3,7 @@ use strict;
 use utf8;
 
 use lib '../lib';
-# BEGIN { $ENV{'SUBMISSION_DEBUG'}++; $ENV{'SUBMISSION_TRACE'}++ };
+BEGIN { $ENV{'SUBMISSION_DEBUG'}++ };
 use POE qw(Component::Net::LastFM::Submission XS::Queue::Array);
 use Data::Dumper;
 
@@ -26,7 +26,7 @@ POE::Session->create(
 		
 		np => sub {
 			warn Dumper $_[ARG0];
-			$_[HEAP]->{__i}++ == 10
+			$_[HEAP]->{__i}++ == 50
 				?
 					$_[KERNEL]->post(
 						'LASTFM_SUBMIT' => 'submit' => 'sb',

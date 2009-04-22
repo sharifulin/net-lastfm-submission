@@ -9,7 +9,7 @@ use Carp 'croak';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.6';
+our $VERSION = '0.61';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -120,7 +120,8 @@ sub _request_now_playing {
 	return $self->_error('Need Session ID string returned by the handshake request'  ) unless $self->{'hs'}->{'sid'};
 	return $self->_error('Need artist/title name') if grep { !$param->{$_} } 'artist', 'title';
 	
-	$self->_encode($param->{'enc'}) for grep { $_ } @$param{'artist', 'title', 'album'};
+	my $enc = $param->{'enc'} || $self->{'enc'};
+	$_ = encode_data($_, $enc) for grep { $_ } @$param{'artist', 'title', 'album'};
 	
 	my $r = POST($self->{'hs'}->{'url'}->{'np'}, [
 		's' => $self->{'hs'}->{'sid'},
@@ -147,8 +148,8 @@ sub _request_submit {
 	
 	$list = [
 		grep {
-			my $enc = $_->{'enc'};
-			$self->_encode($enc) for grep { $_ } @$_{'artist', 'title', 'album'};
+			my $enc = $_->{'enc'} || $self->{'enc'};
+			$_ = encode_data($_, $enc) for grep { $_ } @$_{'artist', 'title', 'album'};
 			1;
 		}
 		grep { $_->{'title'} && $_->{'artist'} }
@@ -206,15 +207,15 @@ sub _error {
 
 # encode data
 
-sub _encode {
-	my $self = shift;
-	my $enc  = shift || $self->{'enc'};
+sub encode_data($$) {
+	my $data = shift;
+	my $enc  = shift;
 	
 	use Encode ();
-	DEBUG && warn("Encode data $enc to utf8"), $_ = Encode::encode_utf8 Encode::decode($enc, $_) unless Encode::is_utf8($_);
-	Encode::_utf8_off($_);
+	DEBUG && warn("Encode data $enc to utf8"), $data = Encode::encode_utf8 Encode::decode($enc, $data) unless Encode::is_utf8($data);
+	Encode::_utf8_off($data);
 	
-	1;
+	return $data;
 }
 
 1;
@@ -318,7 +319,7 @@ Default value is L<LWP::UserAgent> object with timeout 10 seconds.
 
 =item * I<enc>
 
-The encoding of the data, the module tries to encode the data (artist/title/album) unless the data is UTF-8. See L<Encode>. Optional.
+The encoding of the data, the module tries to encode the data (artist/title/album) unless the data is UTF-8. See function I<encode_data>. Optional.
 Default value is B<cp1251>.
 
 =back
@@ -400,7 +401,7 @@ The MusicBrainz Track ID, or an empty string if not known.
 
 =item * I<enc>
 
-The encoding of the data, the module tries to encode the  data (artist/title/album) unless the data is UTF-8. Optional.
+The encoding of the data, the module tries to encode the  data (artist/title/album) unless the data is UTF-8. See function I<encode_data>. Optional.
 
 =back
 
@@ -508,6 +509,15 @@ Else:
         'reason' => '...'      # reason of error
     }
 
+=head1 FUNCTIONS
+
+=head2 encode_data($data, $enc)
+
+Function tries to encode $data from $enc to UTF-8. See L<Encode>.
+
+    encode_data('foo bar in cp1251', 'cp1251');
+
+Encoding of all data for Last.fm must be UTF-8.
 
 =head1 GENERATE REQUESTS AND PARSE RESPONSES
 

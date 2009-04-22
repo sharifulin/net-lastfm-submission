@@ -1,20 +1,23 @@
 Revision history for Net-LastFM-Submission
 
-0.6  2009-04-10/23:22
+0.61 2009-04-21 12:33
+	Add encode_data and remove _encode
+
+0.6  2009-04-10 23:22
 	Fix documentation
 
-0.5  2009-04-10/15:13
+0.5  2009-04-10 15:13
 	Add POE::Component::Net::LastFM::Submission and support generate requests and parse response.
 	Add examples/poe.pl.
 
-0.4  2009-02-08/00:22
+0.4  2009-02-08 00:22
 	Fix POD
 
-0.3  2009-02-06/16:43
+0.3  2009-02-06 16:43
 	Add dependecies, add examples/ut8.pl, add grep with encode
 
-0.2  2009-02-05/00:20
+0.2  2009-02-05 00:20
 	Edit POD manual
 
-0.1  2009-02-04/18:05
+0.1  2009-02-04 18:05
 	First version
