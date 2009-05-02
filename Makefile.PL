@@ -9,12 +9,17 @@ WriteMakefile
           'EXE_FILES' => [],
           'VERSION_FROM' => 'lib/Net/LastFM/Submission.pm',
           'PREREQ_PM' => {
-                           'Test::More' => 0,
-                           'LWP::UserAgent' => 0,
-                           'Digest::MD5' => 0,
+                           'Test::Exception' => 0,
+                           'Exporter' => 0,
                            'HTTP::Request::Common' => 0,
                            'Encode' => 0,
-                           'Carp' => 0
+                           'Carp' => 0,
+                           'Test::More' => 0,
+                           'LWP::UserAgent' => 0,
+                           'HTTP::Response' => 0,
+                           'Digest::MD5' => 0,
+                           'POE::Component::Client::HTTP' => 0,
+                           'POE' => 0
                          }
         )
 ;

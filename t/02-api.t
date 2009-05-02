@@ -4,12 +4,12 @@ use utf8;
 
 use Test::More tests => 26;
 
-use lib '../lib';
+use lib qw(../lib ..);
 use Net::LastFM::Submission 'encode_data';
 
 my $conf = require '.lastfmrc';
 
-diag "Testing Net::LastFM::Submission $Net::LastFM::Submission::VERSION, Perl $], $^X";
+# diag "Testing Net::LastFM::Submission $Net::LastFM::Submission::VERSION, Perl $], $^X";
 
 my $submit = Net::LastFM::Submission->new('enc' => 'utf8', map { $_ => $conf->{$_} } 'user', 'password');
 

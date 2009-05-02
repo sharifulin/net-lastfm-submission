@@ -2,17 +2,16 @@
 use utf8; # encoding="utf-8"
 use strict;
 
-use lib '../lib';
+use lib qw(../lib ..);
 BEGIN { $ENV{'SUBMISSION_DEBUG'}++ };
 use Net::LastFM::Submission;
 use Data::Dumper;
 
 warn $Net::LastFM::Submission::VERSION;
 
-my $submit = Net::LastFM::Submission->new(
-	'user'      => 'net_lastfm',
-	'password'  => '12',
-);
+my $conf = require '.lastfmrc';
+
+my $submit = Net::LastFM::Submission->new(map { $_ => $conf->{$_} } 'user', 'password');
 
 $submit->handshake;
 

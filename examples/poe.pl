@@ -2,18 +2,16 @@
 use strict;
 use utf8;
 
-use lib '../lib';
+use lib qw(../lib ..);
 BEGIN { $ENV{'SUBMISSION_DEBUG'}++ };
 use POE qw(Component::Net::LastFM::Submission);
 use Data::Dumper;
 
+my $conf = require '.lastfmrc';
+
 POE::Component::Net::LastFM::Submission->spawn(
 	Alias   => 'LASTFM_SUBMIT',
-	Tiemout => 1,
-	LastFM  => {
-		user     => 'net_lastfm',
-		password => '12',
-	},
+	LastFM  => {map { $_ => $conf->{$_} } 'user', 'password'},
 );
 
 POE::Session->create(

@@ -5,13 +5,13 @@ use utf8;
 use Test::More tests => 9;
 use Test::Exception;
 
-use lib '../lib';
+use lib qw(../lib ..);
 use Net::LastFM::Submission;
 use LWP::UserAgent;
 
 my $conf = require '.lastfmrc';
 
-diag "Testing Net::LastFM::Submission $Net::LastFM::Submission::VERSION, Perl $], $^X";
+# diag "Testing Net::LastFM::Submission $Net::LastFM::Submission::VERSION, Perl $], $^X";
 
 throws_ok { Net::LastFM::Submission->new                          } qr/Need user name/,   'empty new';
 throws_ok { Net::LastFM::Submission->new(user => $conf->{'user'}) } qr/Need shared data/, 'shared dara';

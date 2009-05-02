@@ -2,12 +2,14 @@
 use strict;
 use utf8;
 
-use lib '../lib';
+use lib qw(../lib ..);
 BEGIN { $ENV{'SUBMISSION_DEBUG'}++ };
 
 use POE qw(Component::Client::HTTP);
 use POE::Component::Net::LastFM::Submission 0.24; # support an existing client
 use Data::Dumper;
+
+my $conf = require '.lastfmrc';
 
 POE::Component::Client::HTTP->spawn(
 	Alias   => 'HTTP_CLIENT',
@@ -19,10 +21,7 @@ POE::Component::Client::HTTP->spawn(
 POE::Component::Net::LastFM::Submission->spawn(
 	Alias   => 'LASTFM_SUBMIT',
 	Client  => 'HTTP_CLIENT', # use my own client
-	LastFM  => {
-		user     => 'net_lastfm',
-		password => '12',
-	},
+	LastFM  => {map { $_ => $conf->{$_} } 'user', 'password'},
 );
 
 POE::Session->create(

@@ -7,4 +7,4 @@ BEGIN {
 	use_ok( 'Net::LastFM::Submission' );
 }
 
-diag( "Testing Net::LastFM::Submission $Net::LastFM::Submission::VERSION, Perl $], $^X" );
+# diag( "Testing Net::LastFM::Submission $Net::LastFM::Submission::VERSION, Perl $], $^X" );
