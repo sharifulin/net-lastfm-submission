@@ -7,8 +7,8 @@ SYNOPSIS
 	use Net::LastFM::Submission;
 	
 	my $submit = Net::LastFM::Submission->new(
-		'user'      => 'XXX',
-		'password'  => 'YYY',
+		'user'      => 'net_lastfm',
+		'password'  => '12',
 	);
 	
 	$submit->handshake;
