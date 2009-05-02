@@ -268,7 +268,7 @@ You can find documentation for this module with the perldoc command.
 
 You can also look for information at:
 
-=over 5
+=over 6
 
 =item * Github
 
@@ -281,6 +281,10 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-LastFM-Submission>
 =item * AnnoCPAN: Annotated CPAN documentation
 
 L<http://annocpan.org/dist/Net-LastFM-Submission>
+
+=item * CPANTS: CPAN Testing Service
+
+L<http://cpants.perl.org/dist/overview/Net-LastFM-Submission>
 
 =item * CPAN Ratings
 

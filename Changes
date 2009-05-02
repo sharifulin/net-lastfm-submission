@@ -1,5 +1,8 @@
 Revision history for Net-LastFM-Submission
 
+0.64 2009-05-02 19:50
+	Edit POD and add POD to examples/*
+
 0.63 2009-05-02 16:30
 	Support an existing PoCo::Client::HTTP into PoCo::Net::LastFM::Submission (version 0.23). RT #45436 (thanks Martijn van Beers)
 	Add examples/poe_client.pl

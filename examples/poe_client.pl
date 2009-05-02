@@ -58,3 +58,29 @@ POE::Session->create(
 );
 
 POE::Kernel->run;
+
+__END__
+=head1 NAME
+
+examples/poe_client.pl - the example of usage POE::Component::Net::LastFM::Submission
+
+=head1 SYNOPSIS
+
+	cd examples; ./poe_client.pl
+
+=head1 DESCRIPTION
+
+See source code :)
+
+=head1 AUTHOR
+
+Anatoly Sharifulin, E<lt>sharifulin at gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2009 by Anatoly Sharifulin.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut

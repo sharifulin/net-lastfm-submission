@@ -1,40 +1,43 @@
 #!/usr/bin/perl
-use utf8; # encoding="utf-8"
 use strict;
 
-use lib qw(../lib ..);
 BEGIN { $ENV{'SUBMISSION_DEBUG'}++ };
-use Net::LastFM::Submission;
+use lib qw(../lib ..);
+use Net::LastFM::Submission 0.61;
 use Data::Dumper;
 
-warn $Net::LastFM::Submission::VERSION;
+my $a = 'Ïðèâåò';
+# Encode::_utf8_on($a);
+warn Encode::is_utf8($a);
+warn $a = Net::LastFM::Submission::encode_data($a, 'cp1251');
+warn Encode::is_utf8($a);
+warn $a;
 
 my $conf = require '.lastfmrc';
 
 my $submit = Net::LastFM::Submission->new(map { $_ => $conf->{$_} } 'user', 'password');
 
-$submit->handshake;
+warn Dumper $submit->handshake;
 
 warn Dumper $submit->submit(
-	'artist' => 'ÐÑ€Ñ‚Ð¸ÑÑ‚1',
-	'title'  => 'ÐŸÐµÑÐ½Ñ1',
+	'artist' => 'Àðòèñò',
+	'title'  => 'Ïåñíÿ',
 	'time'   => time - 10*60,
 );
 
-# no module encoding
 warn Dumper $submit->now_playing(
-	'artist' => 'ÐÑ€Ñ‚Ð¸ÑÑ‚2',
-	'title'  => 'ÐŸÐµÑÐ½Ñ2',
+	'artist' => 'Àðòèñò',
+	'title'  => 'Ïåñíÿ2',
 );
 
 __END__
 =head1 NAME
 
-examples/submit.pl - the example of usage Net::LastFM::Submission
+examples/enc.pl - the example of usage Net::LastFM::Submission with encode_data
 
 =head1 SYNOPSIS
 
-	cd examples; ./submit.pl
+	cd examples; ./enc.pl
 
 =head1 DESCRIPTION
 

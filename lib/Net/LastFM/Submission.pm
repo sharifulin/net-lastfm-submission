@@ -11,7 +11,7 @@ use base 'Exporter'; our @EXPORT = 'encode_data';
 
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -515,7 +515,7 @@ Else:
 
 =head2 encode_data($data, $enc)
 
-Function try to encode $data from $enc to UTF-8 and remove BOM-symbol. See L<Encode>.
+Function tries encode $data from $enc to UTF-8 and remove BOM-symbol. See L<Encode>.
 
     use Net::LastFM::Submission 'encode_data';
     
@@ -613,7 +613,7 @@ You can find documentation for this module with the perldoc command.
 
 You can also look for information at:
 
-=over 5
+=over 6
 
 =item * Github
 
@@ -626,6 +626,10 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-LastFM-Submission>
 =item * AnnoCPAN: Annotated CPAN documentation
 
 L<http://annocpan.org/dist/Net-LastFM-Submission>
+
+=item * CPANTS: CPAN Testing Service
+
+L<http://cpants.perl.org/dist/overview/Net-LastFM-Submission>
 
 =item * CPAN Ratings
 
