@@ -32,6 +32,9 @@ The Last.fm Submissions Protocol is designed for the submission of now-playing a
 
 http://www.lastfm.ru/api/submissions
 
+See exmaples/*
+
+
 INSTALLATION
 
 To install this module, run the following commands:
@@ -52,13 +55,16 @@ You can also look for information at:
 
 	RT, CPAN's request tracker
 		http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-LastFM-Submission
-
+	
+	CPANTS, CPAN Testing Service
+		http://cpants.perl.org/dist/overview/Net-LastFM-Submission>
+	
 	AnnoCPAN, Annotated CPAN documentation
 		http://annocpan.org/dist/Net-LastFM-Submission
-
+	
 	CPAN Ratings
 		http://cpanratings.perl.org/d/Net-LastFM-Submission
-
+	
 	Search CPAN
 		http://search.cpan.org/dist/Net-LastFM-Submission/
 
