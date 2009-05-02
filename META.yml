@@ -1,6 +1,6 @@
 ---
 name: Net-LastFM-Submission
-version: 0.63
+version: 0.64
 author:
   - 'Anatoly Sharifulin <sharifulin@gmail.com>'
 abstract: Perl interface to the Last.fm Submissions Protocol
@@ -27,7 +27,7 @@ build_requires:
 provides:
   Net::LastFM::Submission:
     file: lib/Net/LastFM/Submission.pm
-    version: 0.63
+    version: 0.64
   POE::Component::Net::LastFM::Submission:
     file: lib/POE/Component/Net/LastFM/Submission.pm
     version: 0.24
