@@ -9,7 +9,7 @@ use Net::LastFM::Submission 0.5; # support generate requests and parse response
 
 use constant TRACE => $ENV{'SUBMISSION_TRACE'} || 0;
 
-our $VERSION = 0.23;
+our $VERSION = 0.24;
 
 sub spawn {
 	my $type  = shift;
@@ -18,11 +18,16 @@ sub spawn {
 	my $mi    = $type.'->spawn()'; # hi, Rocco Caputto!
 	croak "$mi requires an even number of parameters" if @_ & 1;
 	
-	my $alias = join('_', __PACKAGE__, 'HTTP_CLIENT');
-	POE::Component::Client::HTTP->spawn(
-		Alias => $alias,
-		map { $_ => $param->{$_} } 'Agent', 'Timeout',
-	);
+	my $client;
+	if ($param->{'Client'}) {
+		$client = $param->{'Client'};
+	} else {
+		$client = join '_', __PACKAGE__, 'HTTP_CLIENT';
+		POE::Component::Client::HTTP->spawn(
+			Alias => $client,
+			map { $_ => $param->{$_} } 'Agent', 'Timeout',
+		);
+	}
 	
 	POE::Session->create(
 		options       => { trace => TRACE },
@@ -30,6 +35,7 @@ sub spawn {
 			_start   => sub {
 				$_[KERNEL]->alias_set($param->{'Alias'} || 'LASTFM_SUBMISSION');
 				$_[HEAP]->{'submit'} = Net::LastFM::Submission->new($param->{'LastFM'});
+				$_[HEAP]->{'client'} = $client;
 			},
 			
 			(map {
@@ -42,7 +48,7 @@ sub spawn {
 						unless ref $request eq 'HTTP::Request';
 					
 					$_[KERNEL]->post(
-						$alias => 'request' => 'response',
+						$_[HEAP]->{'client'} => 'request' => 'response',
 						$request => $data,
 					);
 				};
@@ -114,7 +120,7 @@ The module is a non-blocking wrapper around Net::LastFM::Submission module, it i
 Net::LastFM::Submission contains methods for generate requests and parse response (version >= 0.5).
 See documentation L<Net::LastFM::Submission>.
 
-POE::Component::Net::LastFM::Submission uses POE::Component::Client::HTTP.
+POE::Component::Net::LastFM::Submission start own POE::Component::Client::HTTP when the user didn't supply the parameter I<Client>.
 It lets other sessions run while HTTP transactions are being processed, and it lets several HTTP transactions be processed in parallel.
 
 =head1 METHODS
@@ -129,10 +135,26 @@ It lets other sessions run while HTTP transactions are being processed, and it l
             password => '12',
         },
     );
+    
+    # or
+    
+    POE::Component::Client::HTTP->spawn(
+       Alias => 'HTTP_CLIENT',
+       ...
+    );
+
+    POE::Component::Net::LastFM::Submission->spawn(
+       Alias  => 'LASTFM_SUBMIT',
+       Client => 'HTTP_CLIENT', # alias or session id of PoCo::Client::HTTP
+       LastFM => {
+           user     => 'net_lastfm',
+           password => '12',
+       },
+    );
 
 PoCo::Net::LastFM::Submission's spawn method takes a few named parameters:
 
-=over 4
+=over 5
 
 =item * I<Alias>
 
@@ -147,15 +169,19 @@ This is a constructor for Net::LastFM::Submission object. It takes list of param
 The data for Net::LastFM::Submission constructor. It's hashref of data. Required.
 See L<Net::LastFM::Submission>.
 
+=item * I<Client>
+
+The alias or session id of an existing PoCo::Client::HTTP. Optional. See L<POE::Component::Client::HTTP>.
+
 =item * I<Agent>
 
 The user agent of the client. Optional.
-It is a agent of PoCo::Client::HTTP. See L<POE::Component::Client::HTTP>.
+It is a agent of own PoCo::Client::HTTP. See L<POE::Component::Client::HTTP>.
 
 =item * I<Timeout>
 
 The timeout of the client. Optional.
-It is a timeout of PoCo::Client::HTTP. See L<POE::Component::Client::HTTP>.
+It is a timeout of own PoCo::Client::HTTP. See L<POE::Component::Client::HTTP>.
 
 =back
 
@@ -212,7 +238,7 @@ The module supports trace mode - trace POE session.
 
 =head1 EXAMPLES
 
-See I<examples/poe.pl> in this distributive.
+See I<examples/poe*.pl> in this distributive.
 
 
 =head1 SEE ALSO

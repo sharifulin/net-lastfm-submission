@@ -9,15 +9,23 @@ my $builder = Module::Build->new(
 	dist_author         => 'Anatoly Sharifulin <sharifulin@gmail.com>',
 	dist_version_from   => 'lib/Net/LastFM/Submission.pm',
 	build_requires => {
-		'Test::More' => 0,
+		'Test::More'      => 0,
+		'Test::Exception' => 0,
+		'LWP::UserAgent'  => 0,
+		'HTTP::Response'  => 0,
+		'Encode'          => 0,
 	},
 	requires => {
-		'perl' => '5.008',
-		'LWP::UserAgent' => 0,
+		'perl'                  => '5.008',
+		'LWP::UserAgent'        => 0,
 		'HTTP::Request::Common' => 0,
-		'Encode' => 0,
-		'Digest::MD5' => 0,
-		'Carp' => 0,
+		'Encode'                => 0,
+		'Digest::MD5'           => 0,
+		'Carp'                  => 0,
+		'Exporter'              => 0,
+		
+		'POE'                          => 0,
+		'POE::Component::Client::HTTP' => 0,
 	},
 	meta_merge => {
 		resources => {

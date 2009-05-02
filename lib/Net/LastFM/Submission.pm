@@ -7,9 +7,11 @@ use HTTP::Request::Common 'GET', 'POST';
 use Digest::MD5 'md5_hex';
 use Carp 'croak';
 
+use base 'Exporter'; our @EXPORT = 'encode_data';
+
 use constant DEBUG => $ENV{'SUBMISSION_DEBUG'} || 0;
 
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 our $URL     = 'http://post.audioscrobbler.com/';
 
 sub new {
@@ -44,7 +46,7 @@ sub new {
 	if (defined $self->{'user'}->{'password'}) {
 		$self->{'auth'}->{'type'} = 'standard';
 	} else {
-		croak 'Need shared data (api_key/api_secret/session_key) for Web Services authentication' if grep { !$_ } @{$self->{'api'}}{'key', 'secret'}, $self->{'auth'}->{'secret_key'};
+		croak 'Need shared data (api_key/api_secret/session_key) for Web Services authentication' if grep { !$_ } @{$self->{'api'}}{'key', 'secret'}, $self->{'auth'}->{'session'};
 		$self->{'auth'}->{'type'} = 'web';
 	}
 	
@@ -116,8 +118,8 @@ sub _request_now_playing {
 	my $self  = shift;
 	my $param = ref $_[0] eq 'HASH' ? shift : {@_};
 	
-	return $self->_error('Need the now-playing URL returned by the handshake request') unless $self->{'hs'}->{'url'}->{'np'};
-	return $self->_error('Need Session ID string returned by the handshake request'  ) unless $self->{'hs'}->{'sid'};
+	return $self->_error('Need a now-playing URL returned by the handshake request') unless $self->{'hs'}->{'url'}->{'np'};
+	return $self->_error('Need session ID string returned by the handshake request') unless $self->{'hs'}->{'sid'};
 	return $self->_error('Need artist/title name') if grep { !$param->{$_} } 'artist', 'title';
 	
 	my $enc = $param->{'enc'} || $self->{'enc'};
@@ -142,8 +144,8 @@ sub _request_submit {
 	my $self = shift;
 	my $list = ref $_[0] eq 'HASH' ? [@_] : [{@_}];
 	
-	return $self->_error('Need the now-playing URL returned by the handshake request') unless $self->{'hs'}->{'url'}->{'np'};
-	return $self->_error('Need Session ID string returned by the handshake request'  ) unless $self->{'hs'}->{'sid'};
+	return $self->_error('Need a submit URL returned by the handshake request'     ) unless $self->{'hs'}->{'url'}->{'sm'};
+	return $self->_error('Need session ID string returned by the handshake request') unless $self->{'hs'}->{'sid'};
 	DEBUG && warn "Use first $self->{'limit'} tracks for submissions";
 	
 	$list = [
@@ -230,8 +232,8 @@ Net::LastFM::Submission - Perl interface to the Last.fm Submissions Protocol
     use Net::LastFM::Submission;
     
     my $submit = Net::LastFM::Submission->new(
-        user      => 'XXX',
-        password  => 'YYY',
+        user      => 'net_lastfm',
+        password  => '12',
     );
     
     $submit->handshake;
@@ -263,14 +265,14 @@ This is a constructor for Net::LastFM::Submission object. It takes list of param
 
     # list
     my $submit = Net::LastFM::Submission->new(
-        user     => 'XXX',
-        password => 'YYY',
+        user     => 'net_lastfm',
+        password => '12',
     );
     
     # hashref
     my $submit = Net::LastFM::Submission->new({
-        user     => 'XXX',
-        password => 'YYY',
+        user     => 'net_lastfm',
+        password => '12',
     });
 
 This is a list of support parameters:
@@ -513,8 +515,10 @@ Else:
 
 =head2 encode_data($data, $enc)
 
-Function tries to encode $data from $enc to UTF-8. See L<Encode>.
+Function try to encode $data from $enc to UTF-8 and remove BOM-symbol. See L<Encode>.
 
+    use Net::LastFM::Submission 'encode_data';
+    
     encode_data('foo bar in cp1251', 'cp1251');
 
 Encoding of all data for Last.fm must be UTF-8.
@@ -589,7 +593,7 @@ Module providing routines to submit songs to last.fm using 1.2 protocol. Use pat
 
 =head1 DEPENDENCIES
 
-L<LWP::UserAgent> L<HTTP::Request::Common> L<Encode> L<Digest::MD5> L<Carp>
+L<LWP::UserAgent> L<HTTP::Request::Common> L<Encode> L<Digest::MD5> L<Carp> L<Exporter>
 
 =head1 AUTHOR
 
