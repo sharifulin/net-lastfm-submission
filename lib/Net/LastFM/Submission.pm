@@ -558,7 +558,7 @@ I<_response($response)>
 
 This feature can use for async model (even-driven) such as L<POE>, L<IO::Lambda> or L<AnyEvent>.
 
-See L<POE::Component::Net::Submission::LastFM>.
+See L<POE::Component::Net::LastFM::Submission>.
 
 
 =head1 DEBUG MODE
