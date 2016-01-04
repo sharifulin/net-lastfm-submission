@@ -29,7 +29,7 @@ my $builder = Module::Build->new(
 	},
 	meta_merge => {
 		resources => {
-			repository => 'http://github.com/sharifulin/net-lastfm-submission/tree',
+			repository => 'http://github.com/sharifulin/net-lastfm-submission',
 		},
 		keywords => [
 			'last.fm',
